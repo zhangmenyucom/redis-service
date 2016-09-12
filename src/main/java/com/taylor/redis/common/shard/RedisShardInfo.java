@@ -5,104 +5,108 @@ import redis.clients.jedis.Protocol;
 
 public class RedisShardInfo {
 
-    private Integer timeout  = Protocol.DEFAULT_TIMEOUT;
+	private Integer timeout = Protocol.DEFAULT_TIMEOUT;
 
-    private String  host;
+	private String host;
 
-    private Integer port;
+	private Integer port;
 
-    private String  password = null;
-    
-    private String instanceid;
+	private String password = null;
 
-    private Integer groupId;
+	private String instanceid;
 
-    public Jedis createResource() {
-    	Jedis client = new Jedis(host, port, timeout);
-    	if((password != null) && (password.trim().length() > 0)){
-    		client.auth(password);
-        }
-        return client;
-    }
+	private Integer groupId;
 
-    @Override
-    public String toString() {
+	public Jedis createResource() {
+		Jedis client = new Jedis(host, port, timeout);
+		if ((password != null) && (password.trim().length() > 0)) {
+			client.auth(password);
+		}
+		return client;
+	}
 
-        return "[groupId=" + groupId + "],[host=" + host + "],[port=" + port + "]";
-    }
+	@Override
+	public String toString() {
 
-    /**
-     * @return the timeout
-     */
-    public Integer getTimeout() {
-        return timeout;
-    }
+		return "[groupId=" + groupId + "],[host=" + host + "],[port=" + port + "]";
+	}
 
-    /**
-     * @param timeout the timeout to set
-     */
-    public void setTimeout(Integer timeout) {
-        this.timeout = timeout;
-    }
+	/**
+	 * @return the timeout
+	 */
+	public Integer getTimeout() {
+		return timeout;
+	}
 
-    /**
-     * @return the host
-     */
-    public String getHost() {
-        return host;
-    }
+	/**
+	 * @param timeout
+	 *            the timeout to set
+	 */
+	public void setTimeout(Integer timeout) {
+		this.timeout = timeout;
+	}
 
-    /**
-     * @param host the host to set
-     */
-    public void setHost(String host) {
-        this.host = host;
-    }
+	/**
+	 * @return the host
+	 */
+	public String getHost() {
+		return host;
+	}
 
-    /**
-     * @return the port
-     */
-    public Integer getPort() {
-        return port;
-    }
+	/**
+	 * @param host
+	 *            the host to set
+	 */
+	public void setHost(String host) {
+		this.host = host;
+	}
 
-    /**
-     * @param port the port to set
-     */
-    public void setPort(Integer port) {
-        this.port = port;
-    }
+	/**
+	 * @return the port
+	 */
+	public Integer getPort() {
+		return port;
+	}
 
-    /**
-     * @return the password
-     */
-    public String getPassword() {
-        return password;
-    }
+	/**
+	 * @param port
+	 *            the port to set
+	 */
+	public void setPort(Integer port) {
+		this.port = port;
+	}
 
-    /**
-     * @param password the password to set
-     */
-    public void setPassword(String password) {
-        this.password = password;
-    }
+	/**
+	 * @return the password
+	 */
+	public String getPassword() {
+		return password;
+	}
 
-    /**
-     * @return the groupId
-     */
-    public Integer getGroupId() {
-        return groupId;
-    }
+	/**
+	 * @param password
+	 *            the password to set
+	 */
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
-    /**
-     * @param groupId the groupId to set
-     */
-    public void setGroupId(Integer groupId) {
-        this.groupId = groupId;
-    }
-    
-    
-    public String getInstanceid() {
+	/**
+	 * @return the groupId
+	 */
+	public Integer getGroupId() {
+		return groupId;
+	}
+
+	/**
+	 * @param groupId
+	 *            the groupId to set
+	 */
+	public void setGroupId(Integer groupId) {
+		this.groupId = groupId;
+	}
+
+	public String getInstanceid() {
 		return instanceid;
 	}
 
@@ -110,44 +114,47 @@ public class RedisShardInfo {
 		this.instanceid = instanceid;
 	}
 
-	/*
-     * (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((groupId == null) ? 0 : groupId.hashCode());
-        result = prime * result + ((host == null) ? 0 : host.hashCode());
-        result = prime * result + ((password == null) ? 0 : password.hashCode());
-        result = prime * result + ((port == null) ? 0 : port.hashCode());
-        return result;
-    }
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((groupId == null) ? 0 : groupId.hashCode());
+		result = prime * result + ((host == null) ? 0 : host.hashCode());
+		result = prime * result + ((password == null) ? 0 : password.hashCode());
+		result = prime * result + ((port == null) ? 0 : port.hashCode());
+		return result;
+	}
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        RedisShardInfo other = (RedisShardInfo) obj;
-        if (groupId == null) {
-            if (other.groupId != null) return false;
-        } else if (!groupId.equals(other.groupId)) return false;
-        if (host == null) {
-            if (other.host != null) return false;
-        } else if (!host.equals(other.host)) return false;
-        if (password == null) {
-            if (other.password != null) return false;
-        } else if (!password.equals(other.password)) return false;
-        if (port == null) {
-            if (other.port != null) return false;
-        } else if (!port.equals(other.port)) return false;
-        return true;
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		RedisShardInfo other = (RedisShardInfo) obj;
+		if (groupId == null) {
+			if (other.groupId != null)
+				return false;
+		} else if (!groupId.equals(other.groupId))
+			return false;
+		if (host == null) {
+			if (other.host != null)
+				return false;
+		} else if (!host.equals(other.host))
+			return false;
+		if (password == null) {
+			if (other.password != null)
+				return false;
+		} else if (!password.equals(other.password))
+			return false;
+		if (port == null) {
+			if (other.port != null)
+				return false;
+		} else if (!port.equals(other.port))
+			return false;
+		return true;
+	}
 
 }

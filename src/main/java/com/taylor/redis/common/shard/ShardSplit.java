@@ -78,12 +78,9 @@ public class ShardSplit implements RedisShardSplit<JedisPool, RedisMasterSlaverG
 	 */
 	public static ShardSplit getInstance(List<RedisMasterSlaverGroup> shards, GenericObjectPoolConfig poolConfig, Pattern tagPattern) {
 		if (null == instance) {
-
 			synchronized (ShardSplit.class) {
 				if (null == instance) {
-
 					instance = new ShardSplit(shards, poolConfig, tagPattern);
-
 				}
 			}
 		}
@@ -104,31 +101,23 @@ public class ShardSplit implements RedisShardSplit<JedisPool, RedisMasterSlaverG
 	}
 
 	public void initResources(List<RedisMasterSlaverGroup> shards) {
-		if (CollectionUtils.isEmpty(shards))
+		if (CollectionUtils.isEmpty(shards)) {
 			return;
-
+		}
 		SHARD_NUM = SHARD_NUM < 0 ? 0 : SHARD_NUM;
-
 		// 进行排序，按照序列对应hash + 1值
 		try {
-
 			Collections.sort(shards, new Comparator<RedisMasterSlaverGroup>() {
-
 				public int compare(RedisMasterSlaverGroup shard1, RedisMasterSlaverGroup shard2) {
-
 					return shard1.getId().compareTo(shard2.getId());
 				}
-
 			});
-
 			// 创建连接池，每一个分片服务器对应一个连接池
 			for (int i = 0; i != shards.size(); ++i) {
 				final RedisMasterSlaverGroup groupInfo = shards.get(i);
-
 				// INIT ID
 				group2Hash.put(groupInfo.getId(), Integer.valueOf(1 + i));
 				nodes.put(Integer.valueOf(1 + i), groupInfo);
-
 				resources.put(groupInfo, createReaource(groupInfo, poolConfig));
 				SHARD_NUM++;
 			}
@@ -149,19 +138,15 @@ public class ShardSplit implements RedisShardSplit<JedisPool, RedisMasterSlaverG
 	 */
 	private JedisPool createReaource(RedisMasterSlaverGroup groupInfo, GenericObjectPoolConfig poolConfig) throws RedisMasterShardNotExistsException, RedisShardConnectException {
 		RedisShardInfo master = groupInfo.getMaster();
-
 		if (master == null) {
-
 			throw new RedisMasterShardNotExistsException(" master not exist in group : " + groupInfo.getId());
 		}
-
 		try {
 			if (master.getPassword() != null && master.getPassword().trim().length() > 0) {
 				return new JedisPool(poolConfig, master.getHost(), master.getPort(), master.getTimeout(), master.getPassword());
 			}
 			return new JedisPool(poolConfig, master.getHost(), master.getPort(), master.getTimeout());
 		} catch (Throwable e) {
-
 			throw new RedisShardConnectException(groupInfo.getName() + " redis shard server create failed! ", e);
 		}
 	}
@@ -172,21 +157,20 @@ public class ShardSplit implements RedisShardSplit<JedisPool, RedisMasterSlaverG
 	private volatile ExecutorService executor = null;
 
 	public void reBuildResources(final List<RedisMasterSlaverGroup> shardGroups) {
-
-		if (CollectionUtils.isEmpty(shardGroups))
+		if (CollectionUtils.isEmpty(shardGroups)) {
 			return;
-
+		}
 		/**
 		 * 2. 避免任务失败时，多次重复创建线程。
 		 */
-		if (executor != null)
+		if (executor != null) {
 			return;
-
+		}
 		synchronized (this) {
 			// double check
-			if (executor != null)
+			if (executor != null) {
 				return;
-
+			}
 			executor = Executors.newSingleThreadExecutor();
 		}
 		try {
@@ -194,7 +178,6 @@ public class ShardSplit implements RedisShardSplit<JedisPool, RedisMasterSlaverG
 			executor.submit(new Restorer(shardGroups));
 			// 2. check all resource and restore if master has switched
 			executor.submit(new Restorer(nodes.values()));
-
 		} catch (Throwable e) {
 			throw new RedisResourceInitException("redis resources init exception", e);
 		} finally {
@@ -280,7 +263,6 @@ public class ShardSplit implements RedisShardSplit<JedisPool, RedisMasterSlaverG
 		}
 		// start from 1
 		Integer id = (int) (1 + Math.abs(MURMUR_HASH.hash(key) % SHARD_NUM));
-
 		return nodes.get(id);
 	}
 
@@ -324,6 +306,7 @@ public class ShardSplit implements RedisShardSplit<JedisPool, RedisMasterSlaverG
 			try {
 				pool.destroy();
 			} catch (Throwable e) {
+				e.printStackTrace();
 			}
 		}
 

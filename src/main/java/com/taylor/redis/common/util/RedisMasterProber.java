@@ -37,18 +37,17 @@ public class RedisMasterProber {
 		}
 
 		public RedisMasterSlaverGroup call() throws Exception {
-
 			log.info("Discovery the master or slaver server thread start....");
-			if (null == shardGroup)
+			if (null == shardGroup) {
 				return null;
-
+			}
 			// all shard info
 			List<RedisShardInfo> shards = new ArrayList<RedisShardInfo>();
 			// cur master, is null when initialize
 			final RedisShardInfo master = shardGroup.getMaster();
 			// true: master exists but cannot connect
 			boolean hasMasterButErr = false;
-
+			System.out.println(master);
 			if (master != null) {
 				try {
 					// master available , return
@@ -64,24 +63,17 @@ public class RedisMasterProber {
 				}
 			}
 			shards.addAll(shardGroup.getSlaverList());
-
 			RedisMasterSlaverGroup group = new RedisMasterSlaverGroup();
 			group.setId(groupId);
-
 			do {
-
 				// 1.do find a master from slaver list
 				if (CollectionUtils.isNotEmpty(shards)) {
-
 					for (RedisShardInfo shard : shards) {
-
 						try {
-
 							if (isMaster(shard)) {
 								if (!hasMasterButErr && group.getMaster() != null) {
 									// has two differ master
 									if (!shard.equals(group.getMaster())) {
-
 										throw new RedisMultiMasterShardException("Exists multi master server in shard group : " + shardGroup.getId());
 									}
 									// slaver is same to master
@@ -103,7 +95,6 @@ public class RedisMasterProber {
 				// mostly happend when master server became unavailable,and have
 				// not a slaver server switch to a master
 				if (hasMasterButErr && group.getMaster() == null) {
-
 					try {
 						if (isMaster(master)) {
 							hasMasterButErr = false;
@@ -130,78 +121,93 @@ public class RedisMasterProber {
 			// mostly happend when initialize without master server or it is
 			// unavailable
 			if (group.getMaster() == null) {
-
 				// throw new RedisMasterShardNotExistsException("group [" +
 				// groupId + "] has not a master shard");
 				group.setMaster(group.getSlaverList().get(0));
 			}
-
 			log.info("Discovery the master or slaver server thread finished normally");
 			return group;
 		}
 	}
 
+	/**
+	 * @desc ping(ping连接测试)
+	 * @param shard
+	 * @author xiaolu.zhang
+	 * @date 2016年9月12日 下午10:25:01
+	 */
 	public static boolean ping(RedisShardInfo shard) {
-		if (null == shard)
+		if (null == shard) {
 			return false;
-
+		}
 		Jedis jedis = shard.createResource();
 		return "PONG".equals(jedis.ping());
 	}
 
+	/**
+	 * @desc isMaster(判断是否是主库)
+	 * @param shard
+	 * @author xiaolu.zhang
+	 * @date 2016年9月12日 下午10:24:15
+	 */
 	public static boolean isMaster(RedisShardInfo shard) {
-		// Assert.notNull(shard, "param is null");
-		if (null == shard)
+		if (null == shard) {
 			return false;
-
+		}
 		Jedis jedis = shard.createResource();
-
 		String role = redisInfo(jedis, RedisConfig.ROLE);
-
 		return RedisConfig.ROLE_MASTER.equals(role.trim());
 	}
 
+	/**
+	 * @desc redisInfo(根据关键字获取redis信息 )
+	 * @param jedis
+	 * @param key
+	 * @author xiaolu.zhang
+	 * @date 2016年9月12日 下午10:24:42
+	 */
 	public static String redisInfo(Jedis jedis, String key) {
 		return redisInfo((BinaryJedis) jedis, key);
-
 	}
 
+	/**
+	 * @desc redisInfo(获取redis信息)
+	 * @param jedis
+	 * @param key
+	 * @author xiaolu.zhang
+	 * @date 2016年9月12日 下午10:23:20
+	 */
 	public static String redisInfo(BinaryJedis jedis, String key) {
 		Assert.notNull(jedis, "param jedis is null");
 		Assert.notNull(key, "param key is null");
-
-		// HashMap<String, String> cfgMap = new HashMap<String, String>();
 		String info = jedis.info();
-
+		System.out.println(info);
 		String[] allCfg = info.split(RedisConfig.INFO_SPLITOR);
-
 		for (String cfg : allCfg) {
-			if (StringUtils.isBlank(cfg))
+			if (StringUtils.isBlank(cfg)) {
 				continue;
-
+			}
 			String[] cfgInfo = cfg.split(RedisConfig.INFO_SUB_SPLITOR);
-
 			if (cfgInfo.length == 2 && key.equals(cfgInfo[0])) {
 				return cfgInfo[1];
 			}
 		}
-
 		return "";
 	}
 
 	/**
+	 * @ClassName: RedisConfig
+	 * @Function: 内部类静态配置
+	 * @date: 2016年9月12日 下午10:23:27
+	 * @author xiaolu.zhang
 	 */
 	public static class RedisConfig {
-
 		public static final String INFO_SPLITOR = "\r\n";
-
 		public static final String INFO_SUB_SPLITOR = ":";
-
 		public static final String INFO_SUB_CHILD_SPLITOR = ",";
-
 		public static final String ROLE = "role";
 		public static final String ROLE_MASTER = "master";
-		public static final String ROLE_SLAVER = "slaver";
+		public static final String ROLE_SLAVER = "slave";
 
 	}
 
