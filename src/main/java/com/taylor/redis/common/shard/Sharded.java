@@ -47,10 +47,8 @@ public abstract class Sharded {
 		Jedis j = null;
 
 		try {
-
 			pool = getShardPool(key);
 			j = pool.getResource();
-
 			E rs = callback.doBiz(j);
 			return rs;
 		} catch (JedisConnectionException e) {

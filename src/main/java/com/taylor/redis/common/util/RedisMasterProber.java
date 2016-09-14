@@ -36,25 +36,31 @@ public class RedisMasterProber {
 			this.groupId = groupId;
 		}
 
+		/**
+		 * @desc call(选举master)
+		 * @throws Exception
+		 * @author xiaolu.zhang
+		 * @date 2016年9月14日 下午4:57:03
+		 */
 		public RedisMasterSlaverGroup call() throws Exception {
 			log.info("Discovery the master or slaver server thread start....");
 			if (null == shardGroup) {
 				return null;
 			}
-			// all shard info
 			List<RedisShardInfo> shards = new ArrayList<RedisShardInfo>();
-			// cur master, is null when initialize
+
+			/* 当前master,初始化时为null */
 			final RedisShardInfo master = shardGroup.getMaster();
-			// true: master exists but cannot connect
+
+			/* master存在但不可访问时为true */
 			boolean hasMasterButErr = false;
-			System.out.println(master);
 			if (master != null) {
 				try {
 					// master available , return
 					if (isMaster(master))
 						return shardGroup;
 					else {
-						// not a master but can server add to slaver list
+						/* 当前分组master不是真master并且可以访问，则放入salver中 */
 						ping(master);
 						hasMasterButErr = true;
 					}
@@ -66,63 +72,49 @@ public class RedisMasterProber {
 			RedisMasterSlaverGroup group = new RedisMasterSlaverGroup();
 			group.setId(groupId);
 			do {
-				// 1.do find a master from slaver list
+				/* 清空从列表，防止失败重试 */
+				group.getSlaverList().clear();
+
+				/* 第一步从slaverList中选出一个master */
 				if (CollectionUtils.isNotEmpty(shards)) {
 					for (RedisShardInfo shard : shards) {
 						try {
 							if (isMaster(shard)) {
-								if (!hasMasterButErr && group.getMaster() != null) {
-									// has two differ master
-									if (!shard.equals(group.getMaster())) {
-										throw new RedisMultiMasterShardException("Exists multi master server in shard group : " + shardGroup.getId());
-									}
-									// slaver is same to master
-									group.addSlaver(shard);
+								// 有两个不同的master
+								if (!hasMasterButErr && group.getMaster() != null && !shard.equals(group.getMaster())) {
+									throw new RedisMultiMasterShardException("一个组里存在多个master : " + shardGroup.getId());
 								}
 								group.setMaster(shard);
 							} else {
 								group.addSlaver(shard);
 							}
 						} catch (Throwable e) {
-							log.error(new RedisShardConnectException("Failed get role info of server,will put as a slaver" + shard.toString(), e), e);
+							log.error(new RedisShardConnectException("获取不到redis的role,直接放入salver中" + shard.toString(), e), e);
 							group.addSlaver(shard);
 						}
 					}
 				}
 
-				// 2. hasMasterButErr == true, check master back to nomally,if
-				// not wait 0.5s do this job again
-				// mostly happend when master server became unavailable,and have
-				// not a slaver server switch to a master
+				/* 第2步 出现异常,未找master则0.5秒后重试，以等待从库切换为主库 */
 				if (hasMasterButErr && group.getMaster() == null) {
 					try {
 						if (isMaster(master)) {
 							hasMasterButErr = false;
-							// MASTER resume to normal,return;
 							return shardGroup;
 						}
 					} catch (Throwable e) {
 						hasMasterButErr = true;
 					}
-					// 3. wati for switch slaver to master successly
 					Thread.sleep(500);
 				}
-
 				if (group.getMaster() != null) {
-					// get a master from slaver list, add master as slaver,and
-					// waiting for serving normally
 					group.addSlaver(master);
-
 					hasMasterButErr = false;
 				}
-
 			} while (hasMasterButErr);
 
-			// mostly happend when initialize without master server or it is
-			// unavailable
 			if (group.getMaster() == null) {
-				// throw new RedisMasterShardNotExistsException("group [" +
-				// groupId + "] has not a master shard");
+				/* 组中并没有设置master,默认将第一个设置为master */
 				group.setMaster(group.getSlaverList().get(0));
 			}
 			log.info("Discovery the master or slaver server thread finished normally");

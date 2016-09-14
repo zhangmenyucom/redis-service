@@ -3,20 +3,33 @@ package com.taylor.redis.common.shard;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Protocol;
 
+/**
+ * @ClassName: RedisShardInfo
+ * @Function: Redis客户端信息类
+ * @date: 2016年9月13日 下午8:09:26
+ * @author xiaolu.zhang
+ */
 public class RedisShardInfo {
 
+	/* 读取redis一条命令响应超时时间 默认2秒 */
 	private Integer timeout = Protocol.DEFAULT_TIMEOUT;
 
+	/* redis服务ip地址 */
 	private String host;
 
+	/* 端口号 */
 	private Integer port;
 
+	/* 密码 */
 	private String password = null;
 
+	/* 实例id */
 	private String instanceid;
 
+	/* 组id */
 	private Integer groupId;
 
+	/* 创建一个redis客户端实例 */
 	public Jedis createResource() {
 		Jedis client = new Jedis(host, port, timeout);
 		if ((password != null) && (password.trim().length() > 0)) {
@@ -27,7 +40,6 @@ public class RedisShardInfo {
 
 	@Override
 	public String toString() {
-
 		return "[groupId=" + groupId + "],[host=" + host + "],[port=" + port + "]";
 	}
 
@@ -40,7 +52,6 @@ public class RedisShardInfo {
 
 	/**
 	 * @param timeout
-	 *            the timeout to set
 	 */
 	public void setTimeout(Integer timeout) {
 		this.timeout = timeout;
@@ -55,7 +66,6 @@ public class RedisShardInfo {
 
 	/**
 	 * @param host
-	 *            the host to set
 	 */
 	public void setHost(String host) {
 		this.host = host;
@@ -70,7 +80,6 @@ public class RedisShardInfo {
 
 	/**
 	 * @param port
-	 *            the port to set
 	 */
 	public void setPort(Integer port) {
 		this.port = port;
@@ -85,7 +94,6 @@ public class RedisShardInfo {
 
 	/**
 	 * @param password
-	 *            the password to set
 	 */
 	public void setPassword(String password) {
 		this.password = password;
@@ -100,7 +108,6 @@ public class RedisShardInfo {
 
 	/**
 	 * @param groupId
-	 *            the groupId to set
 	 */
 	public void setGroupId(Integer groupId) {
 		this.groupId = groupId;
@@ -135,25 +142,33 @@ public class RedisShardInfo {
 			return false;
 		RedisShardInfo other = (RedisShardInfo) obj;
 		if (groupId == null) {
-			if (other.groupId != null)
+			if (other.groupId != null) {
 				return false;
-		} else if (!groupId.equals(other.groupId))
+			}
+		} else if (!groupId.equals(other.groupId)) {
 			return false;
+		}
 		if (host == null) {
-			if (other.host != null)
+			if (other.host != null) {
 				return false;
-		} else if (!host.equals(other.host))
+			}
+		} else if (!host.equals(other.host)) {
 			return false;
+		}
 		if (password == null) {
-			if (other.password != null)
+			if (other.password != null) {
 				return false;
-		} else if (!password.equals(other.password))
+			}
+		} else if (!password.equals(other.password)) {
 			return false;
+		}
 		if (port == null) {
-			if (other.port != null)
+			if (other.port != null) {
 				return false;
-		} else if (!port.equals(other.port))
+			}
+		} else if (!port.equals(other.port)) {
 			return false;
+		}
 		return true;
 	}
 

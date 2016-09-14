@@ -29,11 +29,12 @@ import redis.clients.util.MurmurHash;
 import redis.clients.util.SafeEncoder;
 
 /**
- * 类WeimobRedisShardSplit.java的实现描述：
+ * 类RedisShardSplit.java的实现描述：
  * 
  */
 @Log4j2
 public class ShardSplit implements RedisShardSplit<JedisPool, RedisMasterSlaverGroup> {
+
 	private static ShardSplit instance;
 
 	private Pattern tagPattern = null;
