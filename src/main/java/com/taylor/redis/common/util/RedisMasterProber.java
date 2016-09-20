@@ -73,7 +73,9 @@ public class RedisMasterProber {
 			group.setId(groupId);
 			do {
 				/* 清空从列表，防止失败重试 */
-				group.getSlaverList().clear();
+				if (group.getSlaverList() != null) {
+					group.getSlaverList().clear();
+				}
 
 				/* 第一步从slaverList中选出一个master */
 				if (CollectionUtils.isNotEmpty(shards)) {

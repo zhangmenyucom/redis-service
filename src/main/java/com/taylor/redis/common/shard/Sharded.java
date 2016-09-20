@@ -41,6 +41,7 @@ public abstract class Sharded {
 		return this.doOperation(SafeEncoder.encode(key), callback);
 	}
 
+	/** 业务主逻辑 **/
 	public <E> E doOperation(byte[] key, JedisCallBack<E> callback) {
 
 		JedisPool pool = null;
