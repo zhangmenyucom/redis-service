@@ -1,4 +1,4 @@
-package com.taylor.redis_service;
+package com.taylor.redis.service;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
