@@ -146,6 +146,7 @@ public class RedisCacheAspect {
 			redisClientService.set(key, ONEDAY);
 		} else {
 			redisClientService.set(key, object);
+			redisClientService.expire(key, methodType.expire());
 		}
 	}
 
@@ -162,7 +163,8 @@ public class RedisCacheAspect {
 		} else if (methodType.expire() == 1) {// 1:过期时间为24h
 			redisClientService.set(key, ONEDAY);
 		} else {// 手动指定
-			redisClientService.set(key, methodType.expire());
+			redisClientService.set(key, jsonStr);
+			redisClientService.expire(key, methodType.expire());
 		}
 
 	}
@@ -186,7 +188,7 @@ public class RedisCacheAspect {
 		for (int i = 0; i < paraNameArr.length; i++) {
 			context.setVariable(paraNameArr[i], args[i]);
 		}
-		// 如果有这个注解，则获取注解类
+		//走主流程
 		Object object = joinPoint.proceed(args);
 
 		// 如果有这个注解，则获取注解类
